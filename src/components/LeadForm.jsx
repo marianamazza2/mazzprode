@@ -1,0 +1,106 @@
+const inputClass =
+  'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 disabled:bg-slate-100 disabled:text-slate-500'
+
+export default function LeadForm({ value, onChange, disabled }) {
+  const set = (field, v) => onChange({ ...value, [field]: v })
+
+  return (
+    <fieldset disabled={disabled} className="space-y-4">
+      <legend className="mb-1 text-lg font-bold text-slate-900">
+        Tus datos
+      </legend>
+
+      <div>
+        <label htmlFor="lead-name" className="mb-1 block text-sm font-medium text-slate-700">
+          Nombre *
+        </label>
+        <input
+          id="lead-name"
+          type="text"
+          required
+          autoComplete="name"
+          placeholder="Tu nombre"
+          className={inputClass}
+          value={value.name}
+          onChange={(e) => set('name', e.target.value)}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="lead-instagram" className="mb-1 block text-sm font-medium text-slate-700">
+          Instagram
+        </label>
+        <input
+          id="lead-instagram"
+          type="text"
+          placeholder="@tuusuario"
+          className={inputClass}
+          value={value.instagram}
+          onChange={(e) => set('instagram', e.target.value)}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="lead-email" className="mb-1 block text-sm font-medium text-slate-700">
+          Email *
+        </label>
+        <input
+          id="lead-email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="tu@email.com"
+          className={inputClass}
+          value={value.email}
+          onChange={(e) => set('email', e.target.value)}
+        />
+      </div>
+
+      <div className="flex items-center gap-3">
+        <input
+          id="lead-has-business"
+          type="checkbox"
+          className="h-5 w-5 shrink-0 rounded border-slate-300 accent-emerald-600"
+          checked={value.has_business}
+          onChange={(e) => set('has_business', e.target.checked)}
+        />
+        <label htmlFor="lead-has-business" className="text-sm font-medium text-slate-700">
+          ¿Tenés un negocio?
+        </label>
+      </div>
+
+      {value.has_business && (
+        <div>
+          <label htmlFor="lead-business-name" className="mb-1 block text-sm font-medium text-slate-700">
+            ¿Cuál? *
+          </label>
+          <input
+            id="lead-business-name"
+            type="text"
+            required
+            placeholder="Nombre de tu negocio"
+            className={inputClass}
+            value={value.business_name}
+            onChange={(e) => set('business_name', e.target.value)}
+          />
+        </div>
+      )}
+
+      <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-3">
+        <input
+          id="lead-consent"
+          type="checkbox"
+          required
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-emerald-600"
+          checked={value.consent}
+          onChange={(e) => set('consent', e.target.checked)}
+        />
+        <label htmlFor="lead-consent" className="text-xs leading-relaxed text-slate-600">
+          Acepto que mis datos se usen para gestionar este juego y recibir
+          comunicaciones relacionadas, conforme al RGPD. Puedo pedir su
+          eliminación en cualquier momento. *
+        </label>
+      </div>
+    </fieldset>
+  )
+}
