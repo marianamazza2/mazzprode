@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+/* Identidad MAZZMKT */
+@theme {
+  --color-ink: #141414;
+  --color-cream: #f1ede1;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: #141414;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #ffffff;
+}

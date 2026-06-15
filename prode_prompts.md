@@ -28,6 +28,15 @@ final. Al enviar, guarda participant + prediction en Supabase. Si la fecha
 actual es posterior a 2026-06-28, mostrá el form en solo-lectura con un 
 cartel "Pronósticos cerrados". Mobile-first.
 
+Paso 3 BIS:
+En /jugar, en vez de insertar participant y luego prediction por separado con
+limpieza manual del huérfano, creá una función de Postgres "submit_entry" que
+haga los dos inserts en una sola transacción (si falla cualquiera, no queda
+nada). Agregala al schema.sql. Otorgá EXECUTE a anon. Desde el front, llamala
+con supabase.rpc('submit_entry', {...}) y manejá el error de email duplicado
+(23505) mostrando "Ya existe un pronóstico con ese email". Así no hay fila
+huérfana que limpiar y no choca con las políticas RLS.
+
 Paso 4 — Card compartible (el motor viral)
 Creá PredictionCard: un div estilizado (paleta negro/crema, premium, 
 editorial) que muestre las 4 banderas elegidas, "Campeón: [bandera]", el @ del 

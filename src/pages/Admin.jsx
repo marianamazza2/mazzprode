@@ -3,25 +3,21 @@ import { supabase } from '../lib/supabase'
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
 
-const serif = { fontFamily: 'Georgia, "Times New Roman", serif' }
-
 const inputClass =
-  'w-full rounded-xl border border-[#f3ecdc]/30 bg-transparent px-3 py-2.5 text-base text-[#f3ecdc] placeholder:text-[#f3ecdc]/40 focus:border-[#f3ecdc] focus:outline-none [&>option]:bg-[#0c0b09]'
+  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/40 focus:border-cream focus:outline-none [&>option]:bg-ink [&>option]:text-white'
 
 const buttonClass =
-  'w-full rounded-xl bg-[#f3ecdc] py-3 text-base font-bold text-[#0c0b09] transition hover:bg-white active:scale-[0.99] disabled:opacity-60'
+  'w-full rounded-xl bg-cream py-3 text-base font-bold text-ink transition hover:bg-white active:scale-[0.99] disabled:opacity-60'
 
 function Shell({ children }) {
   return (
-    <main className="min-h-screen bg-[#0c0b09] px-4 py-10 text-[#f3ecdc]">
+    <main className="min-h-screen bg-ink px-4 py-10 text-white">
       <div className="mx-auto max-w-md">
         <header className="text-center">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-[#f3ecdc]/60">
-            MazzProde · Mundial 2026
+          <p className="text-[11px] uppercase tracking-[0.3em] text-cream/70">
+            MazzMKT · Mundial 2026
           </p>
-          <h1 className="mt-2 text-4xl italic" style={serif}>
-            Admin
-          </h1>
+          <h1 className="mt-2 text-4xl font-bold text-cream">Admin</h1>
         </header>
         <div className="mt-8">{children}</div>
       </div>
@@ -32,7 +28,7 @@ function Shell({ children }) {
 function TeamSelect({ id, label, value, onChange, teams }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm text-[#f3ecdc]/70">
+      <label htmlFor={id} className="mb-1 block text-sm text-white/70">
         {label}
       </label>
       <select
@@ -73,7 +69,7 @@ function Login() {
 
   if (sent) {
     return (
-      <p className="text-center text-sm text-[#f3ecdc]/70">
+      <p className="text-center text-sm text-white/70">
         📬 Te enviamos un link de acceso a <strong>{email}</strong>. Abrilo
         desde este dispositivo.
       </p>
@@ -83,7 +79,7 @@ function Login() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="admin-email" className="mb-1 block text-sm text-[#f3ecdc]/70">
+        <label htmlFor="admin-email" className="mb-1 block text-sm text-white/70">
           Email de administración
         </label>
         <input
@@ -127,10 +123,7 @@ function Panel() {
   useEffect(() => {
     async function load() {
       const [teamsRes, resultsRes] = await Promise.all([
-        supabase
-          .from('teams')
-          .select('id, name, flag_emoji')
-          .order('name'),
+        supabase.from('teams').select('id, name, flag_emoji').order('name'),
         supabase.from('results').select('*').eq('id', 1).single(),
       ])
       if (teamsRes.error || resultsRes.error) {
@@ -189,56 +182,19 @@ function Panel() {
     setError('')
     setRecalculating(true)
 
-    const [resultsRes, predsRes] = await Promise.all([
-      supabase.from('results').select('*').eq('id', 1).single(),
-      supabase
-        .from('predictions')
-        .select('id, champion_id, runner_up_id, semifinal_3_id, semifinal_4_id'),
-    ])
-
-    if (resultsRes.error || predsRes.error) {
-      setRecalculating(false)
-      setError('No pudimos leer los datos para recalcular.')
-      return
-    }
-
-    const real = resultsRes.data
-    const semis = real.semifinalists ?? []
-
-    const updates = predsRes.data.map((p) => {
-      const picks = [
-        p.champion_id,
-        p.runner_up_id,
-        p.semifinal_3_id,
-        p.semifinal_4_id,
-      ]
-      let points = picks.filter((id) => semis.includes(id)).length * 10
-      if (real.runner_up_id && p.runner_up_id === real.runner_up_id) points += 25
-      if (real.champion_id && p.champion_id === real.champion_id) points += 50
-      return { id: p.id, points }
-    })
-
-    const results = await Promise.all(
-      updates.map((u) =>
-        supabase.from('predictions').update({ points: u.points }).eq('id', u.id),
-      ),
-    )
+    // Todo el cálculo lo hace la función recalculate_points() en la DB:
+    // un solo UPDATE masivo cruzando predictions con results.
+    const { error: err } = await supabase.rpc('recalculate_points')
     setRecalculating(false)
 
-    const failed = results.filter((r) => r.error).length
-    if (failed > 0) {
-      setError(`Falló la actualización de ${failed} de ${updates.length} pronósticos.`)
-    } else {
-      setMessage(`✅ Puntos recalculados para ${updates.length} pronósticos.`)
-    }
+    if (err) setError('No pudimos recalcular los puntos. Probá de nuevo.')
+    else setMessage('✅ Puntos recalculados.')
   }
 
   return (
     <div className="space-y-8">
       <form onSubmit={handleSave} className="space-y-4">
-        <h2 className="text-lg font-bold" style={serif}>
-          Resultado real
-        </h2>
+        <h2 className="text-lg font-bold text-cream">Resultado real</h2>
 
         <TeamSelect id="res-semi1" label="Semifinalista 1" value={form.semi1} onChange={(v) => set('semi1', v)} teams={teams} />
         <TeamSelect id="res-semi2" label="Semifinalista 2" value={form.semi2} onChange={(v) => set('semi2', v)} teams={teams} />
@@ -248,7 +204,7 @@ function Panel() {
         <TeamSelect id="res-champion" label="🏆 Campeón" value={form.champion_id} onChange={(v) => set('champion_id', v)} teams={teams} />
 
         <div>
-          <label htmlFor="res-final-goals" className="mb-1 block text-sm text-[#f3ecdc]/70">
+          <label htmlFor="res-final-goals" className="mb-1 block text-sm text-white/70">
             ⚽ Goles totales en la final
           </label>
           <input
@@ -267,11 +223,11 @@ function Panel() {
           <input
             id="res-locked"
             type="checkbox"
-            className="h-5 w-5 shrink-0 accent-[#f3ecdc]"
+            className="h-5 w-5 shrink-0 accent-cream"
             checked={form.locked}
             onChange={(e) => set('locked', e.target.checked)}
           />
-          <label htmlFor="res-locked" className="text-sm text-[#f3ecdc]/70">
+          <label htmlFor="res-locked" className="text-sm text-white/70">
             Resultado cerrado (locked)
           </label>
         </div>
@@ -281,11 +237,9 @@ function Panel() {
         </button>
       </form>
 
-      <div className="space-y-3 border-t border-[#f3ecdc]/25 pt-6">
-        <h2 className="text-lg font-bold" style={serif}>
-          Puntajes
-        </h2>
-        <p className="text-xs text-[#f3ecdc]/60">
+      <div className="space-y-3 border-t border-cream/20 pt-6">
+        <h2 className="text-lg font-bold text-cream">Puntajes</h2>
+        <p className="text-xs text-white/60">
           +10 por semifinalista acertado · +25 subcampeón exacto · +50 campeón
           exacto. Usa el último resultado guardado.
         </p>
@@ -323,7 +277,7 @@ export default function Admin() {
   if (session === undefined) {
     return (
       <Shell>
-        <p className="text-center text-sm text-[#f3ecdc]/50">Cargando…</p>
+        <p className="text-center text-sm text-white/50">Cargando…</p>
       </Shell>
     )
   }
@@ -340,7 +294,7 @@ export default function Admin() {
     return (
       <Shell>
         <div className="space-y-4 text-center">
-          <p className="text-sm text-[#f3ecdc]/70">
+          <p className="text-sm text-white/70">
             🔒 Esta cuenta ({session.user.email}) no tiene acceso al panel.
           </p>
           <button type="button" onClick={handleSignOut} className={buttonClass}>
@@ -357,7 +311,7 @@ export default function Admin() {
       <button
         type="button"
         onClick={handleSignOut}
-        className="mt-8 w-full text-center text-xs uppercase tracking-[0.2em] text-[#f3ecdc]/40 hover:text-[#f3ecdc]/70"
+        className="mt-8 w-full text-center text-xs uppercase tracking-[0.2em] text-white/40 hover:text-white/70"
       >
         Cerrar sesión
       </button>

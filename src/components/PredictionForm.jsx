@@ -1,10 +1,10 @@
 const selectClass =
-  'w-full appearance-none rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 disabled:bg-slate-100 disabled:text-slate-500'
+  'w-full appearance-none rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white focus:border-cream focus:outline-none disabled:opacity-50 [&_option]:bg-ink [&_option]:text-white [&_optgroup]:bg-ink [&_optgroup]:text-white'
 
 function TeamSelect({ id, label, value, onChange, groups, takenIds }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700">
+      <label htmlFor={id} className="mb-1 block text-sm font-medium text-white/70">
         {label} *
       </label>
       <select
@@ -52,7 +52,7 @@ export default function PredictionForm({ value, onChange, teams, disabled }) {
 
   return (
     <fieldset disabled={disabled} className="space-y-4">
-      <legend className="mb-1 text-lg font-bold text-slate-900">
+      <legend className="mb-1 text-lg font-bold text-cream">
         Tu pronóstico
       </legend>
 
@@ -90,7 +90,7 @@ export default function PredictionForm({ value, onChange, teams, disabled }) {
       />
 
       <div>
-        <label htmlFor="pred-final-goals" className="mb-1 block text-sm font-medium text-slate-700">
+        <label htmlFor="pred-final-goals" className="mb-1 block text-sm font-medium text-white/70">
           ⚽ Goles totales en la final *
         </label>
         <input

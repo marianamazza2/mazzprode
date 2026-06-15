@@ -95,14 +95,14 @@ export default function Jugar() {
   if (success) {
     const teamById = (id) => teams.find((t) => t.id === Number(id))
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-10">
+      <main className="min-h-screen bg-ink px-4 py-10 text-white">
         <div className="mx-auto max-w-md space-y-6">
           <div className="text-center">
             <p className="text-5xl">🎉</p>
-            <h1 className="mt-3 text-2xl font-bold text-slate-900">
+            <h1 className="mt-3 text-2xl font-bold text-cream">
               ¡Pronóstico guardado!
             </h1>
-            <p className="mt-2 text-slate-600">
+            <p className="mt-2 text-white/70">
               Gracias por jugar, {lead.name.trim()}. Después de la final vas a
               poder ver tu puesto en el ranking.
             </p>
@@ -122,24 +122,27 @@ export default function Jugar() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8">
+    <main className="min-h-screen bg-ink px-4 py-8 text-white">
       <div className="mx-auto max-w-md">
-        <h1 className="text-center text-3xl font-extrabold text-slate-900">
+        <p className="text-center text-[11px] uppercase tracking-[0.3em] text-cream/70">
+          MazzMKT · Mundial 2026
+        </p>
+        <h1 className="mt-2 text-center text-3xl font-bold text-cream">
           Prode Mundial 2026
         </h1>
-        <p className="mt-1 text-center text-sm text-slate-600">
+        <p className="mt-1 text-center text-sm text-white/70">
           Elegí tus semifinalistas, el campeón y los goles de la final.
         </p>
 
         {closed && (
-          <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-center font-semibold text-amber-800">
+          <div className="mt-5 rounded-xl border border-cream/30 bg-cream/10 p-4 text-center font-semibold text-cream">
             🔒 Pronósticos cerrados
           </div>
         )}
 
         <form
           onSubmit={handleSubmit}
-          className="mt-5 space-y-8 rounded-2xl bg-white p-5 shadow-sm"
+          className="mt-5 space-y-8 rounded-2xl border border-cream/15 bg-white/5 p-5"
         >
           <LeadForm value={lead} onChange={setLead} disabled={closed} />
           <PredictionForm
@@ -150,7 +153,7 @@ export default function Jugar() {
           />
 
           {error && (
-            <p className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">
+            <p className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm font-medium text-red-300">
               {error}
             </p>
           )}
@@ -159,7 +162,7 @@ export default function Jugar() {
             <button
               type="submit"
               disabled={saving || teams.length === 0}
-              className="w-full rounded-xl bg-emerald-600 py-3.5 text-base font-bold text-white transition hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60"
+              className="w-full rounded-xl bg-cream py-3.5 text-base font-bold text-ink transition hover:bg-white active:scale-[0.99] disabled:opacity-60"
             >
               {saving ? 'Guardando…' : 'Enviar pronóstico'}
             </button>

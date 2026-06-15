@@ -1,17 +1,17 @@
 const inputClass =
-  'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 disabled:bg-slate-100 disabled:text-slate-500'
+  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/40 focus:border-cream focus:outline-none disabled:opacity-50'
 
 export default function LeadForm({ value, onChange, disabled }) {
   const set = (field, v) => onChange({ ...value, [field]: v })
 
   return (
     <fieldset disabled={disabled} className="space-y-4">
-      <legend className="mb-1 text-lg font-bold text-slate-900">
+      <legend className="mb-1 text-lg font-bold text-cream">
         Tus datos
       </legend>
 
       <div>
-        <label htmlFor="lead-name" className="mb-1 block text-sm font-medium text-slate-700">
+        <label htmlFor="lead-name" className="mb-1 block text-sm font-medium text-white/70">
           Nombre *
         </label>
         <input
@@ -27,7 +27,7 @@ export default function LeadForm({ value, onChange, disabled }) {
       </div>
 
       <div>
-        <label htmlFor="lead-instagram" className="mb-1 block text-sm font-medium text-slate-700">
+        <label htmlFor="lead-instagram" className="mb-1 block text-sm font-medium text-white/70">
           Instagram
         </label>
         <input
@@ -41,7 +41,7 @@ export default function LeadForm({ value, onChange, disabled }) {
       </div>
 
       <div>
-        <label htmlFor="lead-email" className="mb-1 block text-sm font-medium text-slate-700">
+        <label htmlFor="lead-email" className="mb-1 block text-sm font-medium text-white/70">
           Email *
         </label>
         <input
@@ -60,18 +60,18 @@ export default function LeadForm({ value, onChange, disabled }) {
         <input
           id="lead-has-business"
           type="checkbox"
-          className="h-5 w-5 shrink-0 rounded border-slate-300 accent-emerald-600"
+          className="h-5 w-5 shrink-0 rounded accent-cream"
           checked={value.has_business}
           onChange={(e) => set('has_business', e.target.checked)}
         />
-        <label htmlFor="lead-has-business" className="text-sm font-medium text-slate-700">
+        <label htmlFor="lead-has-business" className="text-sm font-medium text-white/70">
           ¿Tenés un negocio?
         </label>
       </div>
 
       {value.has_business && (
         <div>
-          <label htmlFor="lead-business-name" className="mb-1 block text-sm font-medium text-slate-700">
+          <label htmlFor="lead-business-name" className="mb-1 block text-sm font-medium text-white/70">
             ¿Cuál? *
           </label>
           <input
@@ -86,16 +86,16 @@ export default function LeadForm({ value, onChange, disabled }) {
         </div>
       )}
 
-      <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-3">
+      <div className="flex items-start gap-3 rounded-xl bg-white/5 p-3">
         <input
           id="lead-consent"
           type="checkbox"
           required
-          className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-emerald-600"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded accent-cream"
           checked={value.consent}
           onChange={(e) => set('consent', e.target.checked)}
         />
-        <label htmlFor="lead-consent" className="text-xs leading-relaxed text-slate-600">
+        <label htmlFor="lead-consent" className="text-xs leading-relaxed text-white/60">
           Acepto que mis datos se usen para gestionar este juego y recibir
           comunicaciones relacionadas, conforme al RGPD. Puedo pedir su
           eliminación en cualquier momento. *

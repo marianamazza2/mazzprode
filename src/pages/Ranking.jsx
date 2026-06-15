@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-const serif = { fontFamily: 'Georgia, "Times New Roman", serif' }
-
 const medals = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
 export default function Ranking() {
@@ -11,21 +9,23 @@ export default function Ranking() {
 
   useEffect(() => {
     async function load() {
-      const [predsRes, resultsRes] = await Promise.all([
+      // Leemos de la view "leaderboard" (nunca expone email) para que
+      // funcione con RLS activado.
+      const [boardRes, resultsRes] = await Promise.all([
         supabase
-          .from('predictions')
-          .select('points, final_goals, participants(name, instagram, created_at)'),
+          .from('leaderboard')
+          .select('instagram, name, points, final_goals, created_at'),
         supabase.from('results').select('final_goals').eq('id', 1).single(),
       ])
 
-      if (predsRes.error || resultsRes.error) {
+      if (boardRes.error || resultsRes.error) {
         setError('No pudimos cargar el ranking. Recargá la página.')
         return
       }
 
       const realGoals = resultsRes.data?.final_goals
 
-      const sorted = [...predsRes.data].sort((a, b) => {
+      const sorted = [...boardRes.data].sort((a, b) => {
         // 1) mayor puntaje primero
         if (b.points !== a.points) return b.points - a.points
         // 2) menor diferencia con los goles reales de la final (si ya se jugó)
@@ -35,10 +35,7 @@ export default function Ranking() {
           if (diffA !== diffB) return diffA - diffB
         }
         // 3) quien cargó primero gana
-        return (
-          new Date(a.participants.created_at) -
-          new Date(b.participants.created_at)
-        )
+        return new Date(a.created_at) - new Date(b.created_at)
       })
 
       setRows(sorted)
@@ -47,30 +44,26 @@ export default function Ranking() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-[#0c0b09] px-4 py-10 text-[#f3ecdc]">
+    <main className="min-h-screen bg-ink px-4 py-10 text-white">
       <div className="mx-auto max-w-md">
         <header className="text-center">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-[#f3ecdc]/60">
-            MazzProde · Mundial 2026
+          <p className="text-[11px] uppercase tracking-[0.3em] text-cream/70">
+            MazzMKT · Mundial 2026
           </p>
-          <h1 className="mt-2 text-4xl italic" style={serif}>
-            Ranking
-          </h1>
+          <h1 className="mt-2 text-4xl font-bold text-cream">Ranking</h1>
         </header>
 
-        <div className="mt-8 border-t border-[#f3ecdc]/25">
+        <div className="mt-8 border-t border-cream/20">
           {error && (
-            <p className="py-8 text-center text-sm text-[#f3ecdc]/70">{error}</p>
+            <p className="py-8 text-center text-sm text-white/70">{error}</p>
           )}
 
           {!error && rows === null && (
-            <p className="py-8 text-center text-sm text-[#f3ecdc]/50">
-              Cargando…
-            </p>
+            <p className="py-8 text-center text-sm text-white/50">Cargando…</p>
           )}
 
           {!error && rows?.length === 0 && (
-            <p className="py-8 text-center text-sm text-[#f3ecdc]/70">
+            <p className="py-8 text-center text-sm text-white/70">
               Todavía no hay pronósticos cargados.
             </p>
           )}
@@ -78,29 +71,26 @@ export default function Ranking() {
           {!error &&
             rows?.map((row, index) => {
               const position = index + 1
-              const ig = row.participants.instagram?.trim()
+              const ig = row.instagram?.trim()
               const handle = ig
                 ? ig.startsWith('@')
                   ? ig
                   : `@${ig}`
-                : row.participants.name
+                : row.name
               return (
                 <div
                   key={`${handle}-${index}`}
-                  className="flex items-center gap-4 border-b border-[#f3ecdc]/15 py-3.5"
+                  className="flex items-center gap-4 border-b border-cream/10 py-3.5"
                 >
-                  <span
-                    className="w-9 shrink-0 text-center text-lg text-[#f3ecdc]/70"
-                    style={serif}
-                  >
+                  <span className="w-9 shrink-0 text-center text-lg font-bold text-cream/80">
                     {medals[position] ?? position}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-base" style={serif}>
+                  <span className="min-w-0 flex-1 truncate text-base text-white">
                     {handle}
                   </span>
-                  <span className="shrink-0 text-lg font-bold tabular-nums">
+                  <span className="shrink-0 text-lg font-bold tabular-nums text-white">
                     {row.points}
-                    <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.15em] text-[#f3ecdc]/50">
+                    <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.15em] text-cream/60">
                       pts
                     </span>
                   </span>
