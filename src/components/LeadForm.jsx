@@ -7,7 +7,7 @@ export default function LeadForm({ value, onChange, disabled }) {
   return (
     <fieldset disabled={disabled} className="space-y-4">
       <legend className="mb-4 text-lg font-bold text-cream">
-        Tus datos para participar
+        Añade tus datos para participar
       </legend>
 
       <div>

@@ -1,35 +1,35 @@
-const selectClass =
-  'w-full appearance-none rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white focus:border-cream focus:outline-none disabled:opacity-50 [&_option]:bg-ink [&_option]:text-white [&_optgroup]:bg-ink [&_optgroup]:text-white'
+import Dropdown from './Dropdown.jsx'
+
+const inputClass =
+  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/40 transition-colors hover:border-cream/60 focus:border-cream focus:outline-none focus:ring-2 focus:ring-cream/20 disabled:opacity-50'
 
 function TeamSelect({ id, label, hint, value, onChange, groups, takenIds }) {
+  // Mapeamos los grupos al formato del Dropdown, marcando como deshabilitadas
+  // las selecciones ya elegidas en otro campo.
+  const dropdownGroups = groups.map(([groupName, groupTeams]) => ({
+    label: `Grupo ${groupName}`,
+    options: groupTeams.map((team) => ({
+      value: team.id,
+      emoji: team.flag_emoji,
+      label: team.name,
+      disabled:
+        takenIds.includes(String(team.id)) && String(team.id) !== String(value),
+    })),
+  }))
+
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-white/70">
         {label} *
       </label>
       {hint && <p className="mb-2.5 mt-1 text-xs text-white/50">{hint}</p>}
-      <select
+      <Dropdown
         id={id}
-        required
-        className={selectClass}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">Elige una selección…</option>
-        {groups.map(([groupName, groupTeams]) => (
-          <optgroup key={groupName} label={`Grupo ${groupName}`}>
-            {groupTeams.map((team) => (
-              <option
-                key={team.id}
-                value={team.id}
-                disabled={takenIds.includes(String(team.id)) && String(team.id) !== value}
-              >
-                {team.flag_emoji} {team.name}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
+        onChange={onChange}
+        placeholder="Elige una selección…"
+        groups={dropdownGroups}
+      />
     </div>
   )
 }
@@ -109,7 +109,7 @@ export default function PredictionForm({ value, onChange, teams, disabled }) {
           max="30"
           inputMode="numeric"
           placeholder="Ej: 3"
-          className={selectClass}
+          className={inputClass}
           value={value.final_goals}
           onChange={(e) => set('final_goals', e.target.value)}
         />

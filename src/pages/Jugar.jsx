@@ -66,6 +66,10 @@ export default function Jugar() {
       prediction.semifinal_3_id,
       prediction.semifinal_4_id,
     ]
+    if (picks.some((p) => !p)) {
+      setError('Completa las cuatro selecciones.')
+      return
+    }
     if (new Set(picks).size < 4) {
       setError('Las cuatro selecciones tienen que ser distintas.')
       return
@@ -188,7 +192,7 @@ export default function Jugar() {
             {/* Puntos */}
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cream/70">
-                Suma puntos así
+                Así sumarás puntos
               </p>
               <ul className="space-y-1.5">
                 <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">

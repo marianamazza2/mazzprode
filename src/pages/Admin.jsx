@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import Dropdown from '../components/Dropdown.jsx'
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
 
 const inputClass =
-  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/40 focus:border-cream focus:outline-none [&>option]:bg-ink [&>option]:text-white'
+  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/40 transition-colors hover:border-cream/60 focus:border-cream focus:outline-none focus:ring-2 focus:ring-cream/20'
 
 const buttonClass =
   'w-full rounded-xl bg-cream py-3 text-base font-bold text-ink transition hover:bg-white active:scale-[0.99] disabled:opacity-60'
@@ -31,19 +32,22 @@ function TeamSelect({ id, label, value, onChange, teams }) {
       <label htmlFor={id} className="mb-1 block text-sm text-white/70">
         {label}
       </label>
-      <select
+      <Dropdown
         id={id}
-        className={inputClass}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">—</option>
-        {teams.map((team) => (
-          <option key={team.id} value={team.id}>
-            {team.flag_emoji} {team.name}
-          </option>
-        ))}
-      </select>
+        onChange={onChange}
+        placeholder="—"
+        groups={[
+          {
+            label: null,
+            options: teams.map((team) => ({
+              value: team.id,
+              emoji: team.flag_emoji,
+              label: team.name,
+            })),
+          },
+        ]}
+      />
     </div>
   )
 }
