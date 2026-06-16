@@ -7,6 +7,16 @@ import PredictionCard from '../components/PredictionCard.jsx'
 // Los pronósticos cierran al final del 28/06/2026 (hora argentina)
 const DEADLINE = new Date('2026-06-28T23:59:59-03:00')
 
+// Texto de la fecha límite que se muestra al usuario (editable)
+const DEADLINE_LABEL = '28 de junio'
+
+// Premios del podio (editables)
+const PRIZES = [
+  { medal: '🥇', place: '1°', prize: 'Landing page profesional' },
+  { medal: '🥈', place: '2°', prize: 'Auditoría SEO de tu web' },
+  { medal: '🥉', place: '3°', prize: 'Ebook "Lanzá tu marca desde cero"' },
+]
+
 const emptyLead = {
   name: '',
   instagram: '',
@@ -41,7 +51,7 @@ export default function Jugar() {
       .order('group_name')
       .order('name')
       .then(({ data, error: err }) => {
-        if (err) setError('No pudimos cargar las selecciones. Recargá la página.')
+        if (err) setError('No pudimos cargar las selecciones. Recarga la página.')
         else setTeams(data)
       })
   }, [])
@@ -83,7 +93,7 @@ export default function Jugar() {
       setError(
         submitError.code === '23505'
           ? 'Ya existe un pronóstico con ese email.'
-          : 'Hubo un error al guardar tu pronóstico. Probá de nuevo.',
+          : 'Hubo un error al guardar tu pronóstico. Prueba de nuevo.',
       )
       return
     }
@@ -103,8 +113,8 @@ export default function Jugar() {
               ¡Pronóstico guardado!
             </h1>
             <p className="mt-2 text-white/70">
-              Gracias por jugar, {lead.name.trim()}. Después de la final vas a
-              poder ver tu puesto en el ranking.
+              Gracias por jugar, {lead.name.trim()}. Después de la final podrás
+              ver tu puesto en el ranking.
             </p>
           </div>
 
@@ -131,7 +141,7 @@ export default function Jugar() {
           Prode Mundial 2026
         </h1>
         <p className="mt-1 text-center text-sm text-white/70">
-          Elegí tus semifinalistas, el campeón y los goles de la final.
+          Elige tus semifinalistas, el campeón y los goles de la final.
         </p>
 
         {closed && (
@@ -139,6 +149,90 @@ export default function Jugar() {
             🔒 Pronósticos cerrados
           </div>
         )}
+
+        <details
+          open
+          className="group mt-5 rounded-2xl border border-cream/15 bg-white/5 p-5"
+        >
+          <summary className="flex cursor-pointer list-none items-center justify-between text-lg font-bold text-cream [&::-webkit-details-marker]:hidden">
+            ¿Cómo participo?
+            <span className="text-base text-cream/60 transition-transform group-open:rotate-180">
+              ▾
+            </span>
+          </summary>
+
+          <div className="mt-6 space-y-6 text-sm leading-relaxed text-white/80">
+            {/* Pasos para participar */}
+            <ol className="space-y-4">
+              {[
+                <>
+                  Comenta <strong>MUNDIAL</strong> en el post, dale like y sigue
+                  la cuenta <strong>@mazzmkt</strong> en Instagram.
+                </>,
+                'Elige tus 4 selecciones: quién saldrá campeón, quién subcampeón, y las otras 2 que llegarán a las semifinales.',
+                'Añade cuántos goles crees que habrá en la final (esto servirá en caso de empate para los posibles ganadores del prode).',
+                <>
+                  Envía tu pronóstico antes del <strong>{DEADLINE_LABEL}</strong>.
+                  ¡Listo, ya estás participando!
+                </>,
+              ].map((step, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-bold text-ink">
+                    {i + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+
+            {/* Puntos */}
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cream/70">
+                Suma puntos así
+              </p>
+              <ul className="space-y-1.5">
+                <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">
+                  <span>Si aciertas el campeón</span>
+                  <span className="shrink-0 font-bold text-cream">+50</span>
+                </li>
+                <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">
+                  <span>Si aciertas el subcampeón</span>
+                  <span className="shrink-0 font-bold text-cream">+25</span>
+                </li>
+                <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">
+                  <span>Cada semifinalista acertado <span className="text-white/50">(los 4 cuentan)</span></span>
+                  <span className="shrink-0 font-bold text-cream">+10</span>
+                </li>
+                <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">
+                  <span>Goles en la final</span>
+                  <span className="shrink-0 text-white/50">solo desempatan</span>
+                </li>
+                <li className="flex items-baseline justify-between gap-3 pt-0.5">
+                  <span className="font-semibold text-cream">Máximo</span>
+                  <span className="shrink-0 font-bold text-cream">115 puntos</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Premios */}
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cream/70">
+                Premios
+              </p>
+              <ul className="space-y-1.5">
+                {PRIZES.map((p) => (
+                  <li key={p.place} className="flex items-center gap-3">
+                    <span className="shrink-0 text-lg">{p.medal}</span>
+                    <span>
+                      <span className="font-semibold text-cream">{p.place}:</span>{' '}
+                      {p.prize}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </details>
 
         <form
           onSubmit={handleSubmit}
@@ -151,6 +245,22 @@ export default function Jugar() {
             teams={teams}
             disabled={closed}
           />
+
+          <fieldset disabled={closed} className="flex items-start gap-3 rounded-xl bg-white/5 p-3">
+            <input
+              id="lead-consent"
+              type="checkbox"
+              required
+              className="mt-0.5 h-5 w-5 shrink-0 rounded accent-cream"
+              checked={lead.consent}
+              onChange={(e) => setLead({ ...lead, consent: e.target.checked })}
+            />
+            <label htmlFor="lead-consent" className="text-xs leading-relaxed text-white/60">
+              Acepto que mis datos se usen para gestionar este juego y recibir
+              comunicaciones relacionadas, conforme al RGPD. Puedo pedir su
+              eliminación en cualquier momento. *
+            </label>
+          </fieldset>
 
           {error && (
             <p className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm font-medium text-red-300">

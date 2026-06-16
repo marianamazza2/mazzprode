@@ -63,14 +63,14 @@ function Login() {
       options: { emailRedirectTo: `${window.location.origin}/admin` },
     })
     setSending(false)
-    if (err) setError('No pudimos enviar el link. Probá de nuevo.')
+    if (err) setError('No pudimos enviar el link. Prueba de nuevo.')
     else setSent(true)
   }
 
   if (sent) {
     return (
       <p className="text-center text-sm text-white/70">
-        📬 Te enviamos un link de acceso a <strong>{email}</strong>. Abrilo
+        📬 Te enviamos un link de acceso a <strong>{email}</strong>. Ábrelo
         desde este dispositivo.
       </p>
     )
@@ -127,7 +127,7 @@ function Panel() {
         supabase.from('results').select('*').eq('id', 1).single(),
       ])
       if (teamsRes.error || resultsRes.error) {
-        setError('No pudimos cargar los datos. Recargá la página.')
+        setError('No pudimos cargar los datos. Recarga la página.')
         return
       }
       setTeams(teamsRes.data)
@@ -173,7 +173,7 @@ function Panel() {
       .eq('id', 1)
     setSaving(false)
 
-    if (err) setError('No pudimos guardar el resultado. Probá de nuevo.')
+    if (err) setError('No pudimos guardar el resultado. Prueba de nuevo.')
     else setMessage('✅ Resultado guardado.')
   }
 
@@ -187,7 +187,7 @@ function Panel() {
     const { error: err } = await supabase.rpc('recalculate_points')
     setRecalculating(false)
 
-    if (err) setError('No pudimos recalcular los puntos. Probá de nuevo.')
+    if (err) setError('No pudimos recalcular los puntos. Prueba de nuevo.')
     else setMessage('✅ Puntos recalculados.')
   }
 

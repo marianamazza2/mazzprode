@@ -19,7 +19,7 @@ export default function Ranking() {
       ])
 
       if (boardRes.error || resultsRes.error) {
-        setError('No pudimos cargar el ranking. Recargá la página.')
+        setError('No pudimos cargar el ranking. Recarga la página.')
         return
       }
 

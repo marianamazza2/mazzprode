@@ -1,12 +1,13 @@
 const selectClass =
   'w-full appearance-none rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white focus:border-cream focus:outline-none disabled:opacity-50 [&_option]:bg-ink [&_option]:text-white [&_optgroup]:bg-ink [&_optgroup]:text-white'
 
-function TeamSelect({ id, label, value, onChange, groups, takenIds }) {
+function TeamSelect({ id, label, hint, value, onChange, groups, takenIds }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-white/70">
+      <label htmlFor={id} className="block text-sm font-medium text-white/70">
         {label} *
       </label>
+      {hint && <p className="mb-2.5 mt-1 text-xs text-white/50">{hint}</p>}
       <select
         id={id}
         required
@@ -14,7 +15,7 @@ function TeamSelect({ id, label, value, onChange, groups, takenIds }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
-        <option value="">Elegí una selección…</option>
+        <option value="">Elige una selección…</option>
         {groups.map(([groupName, groupTeams]) => (
           <optgroup key={groupName} label={`Grupo ${groupName}`}>
             {groupTeams.map((team) => (
@@ -52,13 +53,14 @@ export default function PredictionForm({ value, onChange, teams, disabled }) {
 
   return (
     <fieldset disabled={disabled} className="space-y-4">
-      <legend className="mb-1 text-lg font-bold text-cream">
+      <legend className="mb-4 text-lg font-bold text-cream">
         Tu pronóstico
       </legend>
 
       <TeamSelect
         id="pred-champion"
         label="🏆 Campeón"
+        hint="¿Quién levanta la copa?"
         value={value.champion_id}
         onChange={(v) => set('champion_id', v)}
         groups={groups}
@@ -67,6 +69,7 @@ export default function PredictionForm({ value, onChange, teams, disabled }) {
       <TeamSelect
         id="pred-runner-up"
         label="🥈 Subcampeón"
+        hint="El que pierde la final"
         value={value.runner_up_id}
         onChange={(v) => set('runner_up_id', v)}
         groups={groups}
@@ -75,6 +78,7 @@ export default function PredictionForm({ value, onChange, teams, disabled }) {
       <TeamSelect
         id="pred-semifinal-3"
         label="Semifinalista 3"
+        hint="Uno de los dos que llegan a semis (sin contar campeón ni subcampeón)"
         value={value.semifinal_3_id}
         onChange={(v) => set('semifinal_3_id', v)}
         groups={groups}
@@ -83,6 +87,7 @@ export default function PredictionForm({ value, onChange, teams, disabled }) {
       <TeamSelect
         id="pred-semifinal-4"
         label="Semifinalista 4"
+        hint="Uno de los dos que llegan a semis (sin contar campeón ni subcampeón)"
         value={value.semifinal_4_id}
         onChange={(v) => set('semifinal_4_id', v)}
         groups={groups}
@@ -90,9 +95,12 @@ export default function PredictionForm({ value, onChange, teams, disabled }) {
       />
 
       <div>
-        <label htmlFor="pred-final-goals" className="mb-1 block text-sm font-medium text-white/70">
+        <label htmlFor="pred-final-goals" className="block text-sm font-medium text-white/70">
           ⚽ Goles totales en la final *
         </label>
+        <p className="mb-2.5 mt-1 text-xs text-white/50">
+          Total de goles entre los dos equipos (solo para desempate)
+        </p>
         <input
           id="pred-final-goals"
           type="number"

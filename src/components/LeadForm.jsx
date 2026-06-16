@@ -6,12 +6,12 @@ export default function LeadForm({ value, onChange, disabled }) {
 
   return (
     <fieldset disabled={disabled} className="space-y-4">
-      <legend className="mb-1 text-lg font-bold text-cream">
-        Tus datos
+      <legend className="mb-4 text-lg font-bold text-cream">
+        Tus datos para participar
       </legend>
 
       <div>
-        <label htmlFor="lead-name" className="mb-1 block text-sm font-medium text-white/70">
+        <label htmlFor="lead-name" className="mb-2 block text-sm font-medium text-white/70">
           Nombre *
         </label>
         <input
@@ -27,7 +27,7 @@ export default function LeadForm({ value, onChange, disabled }) {
       </div>
 
       <div>
-        <label htmlFor="lead-instagram" className="mb-1 block text-sm font-medium text-white/70">
+        <label htmlFor="lead-instagram" className="mb-2 block text-sm font-medium text-white/70">
           Instagram
         </label>
         <input
@@ -41,7 +41,7 @@ export default function LeadForm({ value, onChange, disabled }) {
       </div>
 
       <div>
-        <label htmlFor="lead-email" className="mb-1 block text-sm font-medium text-white/70">
+        <label htmlFor="lead-email" className="mb-2 block text-sm font-medium text-white/70">
           Email *
         </label>
         <input
@@ -65,13 +65,13 @@ export default function LeadForm({ value, onChange, disabled }) {
           onChange={(e) => set('has_business', e.target.checked)}
         />
         <label htmlFor="lead-has-business" className="text-sm font-medium text-white/70">
-          ¿Tenés un negocio?
+          ¿Tienes un negocio?
         </label>
       </div>
 
       {value.has_business && (
         <div>
-          <label htmlFor="lead-business-name" className="mb-1 block text-sm font-medium text-white/70">
+          <label htmlFor="lead-business-name" className="mb-2 block text-sm font-medium text-white/70">
             ¿Cuál? *
           </label>
           <input
@@ -86,21 +86,6 @@ export default function LeadForm({ value, onChange, disabled }) {
         </div>
       )}
 
-      <div className="flex items-start gap-3 rounded-xl bg-white/5 p-3">
-        <input
-          id="lead-consent"
-          type="checkbox"
-          required
-          className="mt-0.5 h-5 w-5 shrink-0 rounded accent-cream"
-          checked={value.consent}
-          onChange={(e) => set('consent', e.target.checked)}
-        />
-        <label htmlFor="lead-consent" className="text-xs leading-relaxed text-white/60">
-          Acepto que mis datos se usen para gestionar este juego y recibir
-          comunicaciones relacionadas, conforme al RGPD. Puedo pedir su
-          eliminación en cualquier momento. *
-        </label>
-      </div>
     </fieldset>
   )
 }

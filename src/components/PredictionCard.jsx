@@ -141,7 +141,7 @@ export default function PredictionCard({
       </div>
 
       <p className="text-center text-sm font-semibold text-white/80">
-        📲 Compartí en tu story y etiquetá a 2 amigos
+        📲 Comparte en tu story y etiqueta a 2 amigos
       </p>
 
       <button

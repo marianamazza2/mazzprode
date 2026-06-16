@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-ink px-4 py-12 text-center text-white">
+    <main className="flex h-[100svh] flex-col items-center justify-center overflow-hidden bg-ink px-4 py-8 text-center text-white">
       <div className="mx-auto w-full max-w-md">
         <p className="text-[11px] uppercase tracking-[0.3em] text-cream/70">
           MazzMKT
@@ -13,8 +13,8 @@ export default function Home() {
           Mundial 2026
         </h1>
         <p className="mt-4 text-base text-white/70">
-          Elegí tus semifinalistas, el subcampeón y el campeón. Sumá puntos y
-          competí en el ranking.
+          Elige tus semifinalistas, el subcampeón y el campeón. Suma puntos y
+          compite en el ranking.
         </p>
 
         <div className="mt-10 space-y-3">
