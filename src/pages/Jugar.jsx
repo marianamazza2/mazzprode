@@ -190,7 +190,7 @@ export default function Jugar() {
             </ol>
 
             {/* Puntos */}
-            <div>
+            <div className="pt-4">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cream/70">
                 Así sumarás puntos
               </p>
@@ -219,7 +219,7 @@ export default function Jugar() {
             </div>
 
             {/* Premios */}
-            <div>
+            <div className="pt-4">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cream/70">
                 Premios
               </p>

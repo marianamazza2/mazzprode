@@ -1,5 +1,5 @@
 const inputClass =
-  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/40 focus:border-cream focus:outline-none disabled:opacity-50'
+  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-xs placeholder:text-white/40 focus:border-cream focus:outline-none disabled:opacity-50'
 
 export default function LeadForm({ value, onChange, disabled }) {
   const set = (field, v) => onChange({ ...value, [field]: v })

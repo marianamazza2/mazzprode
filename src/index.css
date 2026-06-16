@@ -18,3 +18,110 @@ body {
   font-family: var(--font-sans);
   color: #ffffff;
 }
+
+/* Guiños mundialistas */
+@keyframes float-ball {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-18px) rotate(8deg);
+  }
+}
+
+@keyframes float-ball-slow {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(22px) rotate(-10deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.animate-float-ball {
+  animation: float-ball 9s ease-in-out infinite;
+}
+
+.animate-float-ball-slow {
+  animation: float-ball-slow 12s ease-in-out infinite;
+}
+
+@keyframes shine-sweep {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rise-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 6s ease-in-out infinite;
+}
+
+.text-shine {
+  background: linear-gradient(
+    100deg,
+    var(--color-cream) 30%,
+    #ffffff 50%,
+    var(--color-cream) 70%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine-sweep 6s linear infinite;
+}
+
+.animate-ring-spin {
+  animation: ring-spin 22s linear infinite;
+}
+
+.animate-rise {
+  animation: rise-fade 0.7s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-shine,
+  .animate-ring-spin,
+  .animate-rise {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-ball,
+  .animate-float-ball-slow,
+  .animate-pulse-glow {
+    animation: none;
+  }
+}

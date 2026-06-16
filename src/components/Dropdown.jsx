@@ -39,7 +39,7 @@ export default function Dropdown({ id, value, onChange, placeholder, groups, dis
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-2 rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-left text-base text-white transition-colors hover:border-cream/60 focus:border-cream focus:outline-none focus:ring-2 focus:ring-cream/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <span className={selected ? 'truncate' : 'truncate text-white/40'}>
+        <span className={selected ? 'truncate' : 'truncate text-xs text-white/40'}>
           {selected ? `${selected.emoji} ${selected.label}` : placeholder}
         </span>
         <svg

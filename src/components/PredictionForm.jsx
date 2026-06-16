@@ -1,7 +1,7 @@
 import Dropdown from './Dropdown.jsx'
 
 const inputClass =
-  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/40 transition-colors hover:border-cream/60 focus:border-cream focus:outline-none focus:ring-2 focus:ring-cream/20 disabled:opacity-50'
+  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-xs placeholder:text-white/40 transition-colors hover:border-cream/60 focus:border-cream focus:outline-none focus:ring-2 focus:ring-cream/20 disabled:opacity-50'
 
 function TeamSelect({ id, label, hint, value, onChange, groups, takenIds }) {
   // Mapeamos los grupos al formato del Dropdown, marcando como deshabilitadas
