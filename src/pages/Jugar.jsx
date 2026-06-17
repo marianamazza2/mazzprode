@@ -216,16 +216,16 @@ export default function Jugar() {
   if (success) {
     const teamById = (id) => teams.find((t) => t.id === Number(id))
     return (
-      <main className="min-h-screen bg-ink px-4 py-10 text-white">
-        <div className="mx-auto max-w-md space-y-6">
+      <main className="min-h-screen bg-ink px-4 py-6 text-white">
+        <div className="mx-auto max-w-md space-y-4">
           <div className="text-center">
-            <p className="text-5xl">🎉</p>
-            <h1 className="mt-3 text-2xl font-bold text-cream">
+            <p className="text-4xl">🎉</p>
+            <h1 className="mt-2 text-xl font-bold text-cream">
               ¡Pronóstico guardado!
             </h1>
-            <p className="mt-2 text-white/70">
-              Gracias por jugar, {lead.name.trim()}. Después de la final podrás
-              ver tu puesto en el ranking.
+            <p className="mt-1 text-sm text-white/70">
+              Gracias por jugar, {lead.name.trim()}. Tras la final podrás ver tu
+              puesto en el ranking.
             </p>
           </div>
 

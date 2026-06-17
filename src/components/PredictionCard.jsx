@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toPng } from 'html-to-image'
 import { dmSansFontFace } from '../lib/dmSansFont'
 
@@ -28,7 +28,24 @@ export default function PredictionCard({
   name,
 }) {
   const cardRef = useRef(null)
+  const rootRef = useRef(null)
   const [sharing, setSharing] = useState(false)
+  // La card se exporta a tamaño completo, pero en pantalla la escalamos para que
+  // entre con el botón "Compartir" sin tener que hacer scroll.
+  const [scale, setScale] = useState(1)
+
+  useEffect(() => {
+    function recalc() {
+      const availW = rootRef.current?.offsetWidth ?? CARD_W
+      // Reservamos algo de alto para el botón, el texto y los márgenes.
+      const availH = window.innerHeight * 0.62
+      const s = Math.min(availW / CARD_W, availH / CARD_H, 1)
+      setScale(Math.max(0.5, s))
+    }
+    recalc()
+    window.addEventListener('resize', recalc)
+    return () => window.removeEventListener('resize', recalc)
+  }, [])
 
   if (!champion || !runnerUp || !semi3 || !semi4) return null
 
@@ -80,18 +97,25 @@ export default function PredictionCard({
   }
 
   return (
-    <div className="space-y-4">
+    <div ref={rootRef} className="space-y-4">
+      {/* Contenedor que reserva el tamaño escalado; la card real (cardRef) se
+          mantiene a 360x640 para exportarla nítida. */}
       <div
-        ref={cardRef}
-        style={{
-          width: CARD_W,
-          height: CARD_H,
-          fontFamily: "'DM Sans', ui-sans-serif, system-ui, sans-serif",
-        }}
-        className="mx-auto flex flex-col bg-ink px-8 py-9 text-white"
+        className="mx-auto overflow-hidden"
+        style={{ width: CARD_W * scale, height: CARD_H * scale }}
       >
-        {/* Fuente embebida: viaja dentro del nodo que html-to-image clona */}
-        <style dangerouslySetInnerHTML={{ __html: dmSansFontFace }} />
+        <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+          <div
+            ref={cardRef}
+            style={{
+              width: CARD_W,
+              height: CARD_H,
+              fontFamily: "'DM Sans', ui-sans-serif, system-ui, sans-serif",
+            }}
+            className="flex flex-col bg-ink px-8 py-9 text-white"
+          >
+            {/* Fuente embebida: viaja dentro del nodo que html-to-image clona */}
+            <style dangerouslySetInnerHTML={{ __html: dmSansFontFace }} />
 
         {/* Cabecera */}
         <div className="flex items-baseline justify-between border-b border-cream/20 pb-4">
@@ -136,8 +160,10 @@ export default function PredictionCard({
 
         {/* Mini-CTA al pie */}
         <p className="mt-4 rounded-lg bg-cream py-2.5 text-center text-sm font-bold text-ink">
-          Jugá vos 👉 comentá MUNDIAL
+          👉 Visita @mazzmkt y juega
         </p>
+          </div>
+        </div>
       </div>
 
       <p className="text-center text-sm font-semibold text-white/80">
