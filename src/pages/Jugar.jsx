@@ -112,6 +112,12 @@ export default function Jugar() {
 
   useEffect(() => () => clearTimeout(advanceTimer.current), [])
 
+  // Al llegar a la pantalla de éxito subimos al inicio: si el paso anterior
+  // venía scrolleado, la card quedaría cortada.
+  useEffect(() => {
+    if (success) window.scrollTo(0, 0)
+  }, [success])
+
   function clearAdvance() {
     clearTimeout(advanceTimer.current)
     advanceTimer.current = null
@@ -224,8 +230,8 @@ export default function Jugar() {
               ¡Pronóstico guardado!
             </h1>
             <p className="mt-1 text-sm text-white/70">
-              Gracias por jugar, {lead.name.trim()}. Tras la final podrás ver tu
-              puesto en el ranking.
+              Gracias por jugar, {lead.name.trim()}. Cuando termine la final
+              cargaremos los resultados y sabrás cuántos puntos sumaste.
             </p>
           </div>
 

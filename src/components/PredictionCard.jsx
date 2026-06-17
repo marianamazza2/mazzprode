@@ -29,7 +29,7 @@ export default function PredictionCard({
 }) {
   const cardRef = useRef(null)
   const rootRef = useRef(null)
-  const [sharing, setSharing] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   // La card se exporta a tamaño completo, pero en pantalla la escalamos para que
   // entre con el botón "Compartir" sin tener que hacer scroll.
   const [scale, setScale] = useState(1)
@@ -59,8 +59,8 @@ export default function PredictionCard({
     link.click()
   }
 
-  async function handleShare() {
-    setSharing(true)
+  async function handleDownload() {
+    setDownloading(true)
     try {
       const dataUrl = await toPng(cardRef.current, {
         width: CARD_W,
@@ -71,28 +71,11 @@ export default function PredictionCard({
         // sea consistente sin depender de la red.
         fontEmbedCSS: dmSansFontFace,
       })
-      const blob = await (await fetch(dataUrl)).blob()
-      const file = new File([blob], 'mi-prode-mundial-2026.png', {
-        type: 'image/png',
-      })
-
-      if (navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: 'MazzMKT — Mundial 2026',
-            text: 'Mi pronóstico para el Mundial 2026 ⚽',
-          })
-        } catch (err) {
-          if (err.name !== 'AbortError') download(dataUrl)
-        }
-      } else {
-        download(dataUrl)
-      }
+      download(dataUrl)
     } catch {
-      // Si la exportación falla no hay nada que compartir; el botón queda disponible para reintentar
+      // Si la exportación falla no hay nada que descargar; el botón queda disponible para reintentar
     } finally {
-      setSharing(false)
+      setDownloading(false)
     }
   }
 
@@ -129,8 +112,8 @@ export default function PredictionCard({
 
         {/* Campeón */}
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <span className="text-[11px] uppercase tracking-[0.3em] text-cream/70">
-            Mi pronóstico
+          <span className="text-[11px] uppercase tracking-[0.2em] text-cream/70">
+            Mi pronóstico en Mazzprode
           </span>
           <span className="mt-6 text-8xl leading-none">
             {champion.flag_emoji}
@@ -167,16 +150,16 @@ export default function PredictionCard({
       </div>
 
       <p className="text-center text-sm font-semibold text-white/80">
-        📲 Comparte en tu story y etiqueta a 2 amigos
+        📥 Descarga tu pronóstico y guárdalo
       </p>
 
       <button
         type="button"
-        onClick={handleShare}
-        disabled={sharing}
+        onClick={handleDownload}
+        disabled={downloading}
         className="w-full rounded-xl bg-cream py-3.5 text-base font-bold text-ink transition hover:bg-white active:scale-[0.99] disabled:opacity-60"
       >
-        {sharing ? 'Preparando imagen…' : 'Compartir'}
+        {downloading ? 'Preparando imagen…' : 'Descargar'}
       </button>
     </div>
   )
