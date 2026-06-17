@@ -37,14 +37,20 @@ export default function PredictionCard({
   useEffect(() => {
     function recalc() {
       const availW = rootRef.current?.offsetWidth ?? CARD_W
-      // Reservamos algo de alto para el botón, el texto y los márgenes.
-      const availH = window.innerHeight * 0.62
-      const s = Math.min(availW / CARD_W, availH / CARD_H, 1)
-      setScale(Math.max(0.5, s))
+      // visualViewport refleja el alto realmente visible en móvil (descontando
+      // las barras del navegador). Reservamos sitio para el título y el botón.
+      const vh = window.visualViewport?.height ?? window.innerHeight
+      const RESERVED = 270
+      const s = Math.min(availW / CARD_W, (vh - RESERVED) / CARD_H, 1)
+      setScale(Math.max(0.45, s))
     }
     recalc()
     window.addEventListener('resize', recalc)
-    return () => window.removeEventListener('resize', recalc)
+    window.visualViewport?.addEventListener('resize', recalc)
+    return () => {
+      window.removeEventListener('resize', recalc)
+      window.visualViewport?.removeEventListener('resize', recalc)
+    }
   }, [])
 
   if (!champion || !runnerUp || !semi3 || !semi4) return null
@@ -148,10 +154,6 @@ export default function PredictionCard({
           </div>
         </div>
       </div>
-
-      <p className="text-center text-sm font-semibold text-white/80">
-        📥 Descarga tu pronóstico y guárdalo
-      </p>
 
       <button
         type="button"
