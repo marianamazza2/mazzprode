@@ -1,20 +1,41 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import Dropdown from '../components/Dropdown.jsx'
 import LeadForm from '../components/LeadForm.jsx'
-import PredictionForm from '../components/PredictionForm.jsx'
 import PredictionCard from '../components/PredictionCard.jsx'
 
 // Los pronósticos cierran al final del 28/06/2026 (hora argentina)
 const DEADLINE = new Date('2026-06-28T23:59:59-03:00')
 
-// Texto de la fecha límite que se muestra al usuario (editable)
-const DEADLINE_LABEL = '28 de junio'
+const TOTAL_STEPS = 6
 
-// Premios del podio (editables)
-const PRIZES = [
-  { medal: '🥇', place: '1°', prize: 'Landing page profesional' },
-  { medal: '🥈', place: '2°', prize: 'Auditoría SEO de tu web' },
-  { medal: '🥉', place: '3°', prize: 'Ebook "Lanzá tu marca desde cero"' },
+// Tope de goles en la final (el récord histórico mundialista es 7).
+const MAX_GOALS = 20
+
+// Email válido: algo @ algo . algo (sin espacios).
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// Campos de selección de países, en el orden en que se preguntan.
+const PICK_FIELDS = ['champion_id', 'runner_up_id', 'semifinal_3_id', 'semifinal_4_id']
+
+// Una pregunta por pantalla (pasos 1 a 4).
+const QUESTIONS = [
+  { field: 'champion_id', emoji: '🏆', title: '¿Quién sale campeón?' },
+  { field: 'runner_up_id', emoji: '🥈', title: '¿Quién sale subcampeón?' },
+  {
+    field: 'semifinal_3_id',
+    emoji: '🎯',
+    title: 'Semifinalista',
+    sub: '1 de 2',
+    hint: 'Llega a semis, sin contar al campeón ni al subcampeón',
+  },
+  {
+    field: 'semifinal_4_id',
+    emoji: '🎯',
+    title: 'Semifinalista',
+    sub: '2 de 2',
+    hint: 'Llega a semis, sin contar al campeón ni al subcampeón',
+  },
 ]
 
 const emptyLead = {
@@ -34,21 +55,54 @@ const emptyPrediction = {
   final_goals: '',
 }
 
+const primaryBtn =
+  'rounded-xl bg-cream py-3.5 text-base font-bold text-ink transition hover:bg-white active:scale-[0.99] disabled:opacity-60'
+const inputClass =
+  'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-xs placeholder:text-white/40 transition-colors hover:border-cream/60 focus:border-cream focus:outline-none focus:ring-2 focus:ring-cream/20 disabled:opacity-50'
+
+function Progress({ step }) {
+  return (
+    <div className="mb-8">
+      <div className="flex items-center gap-1.5">
+        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+          <span
+            key={i}
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              i < step ? 'bg-cream' : 'bg-white/15'
+            }`}
+          />
+        ))}
+      </div>
+      <p className="mt-3.5 text-center text-[11px] uppercase tracking-[0.25em] text-cream/60">
+        Paso {step} de {TOTAL_STEPS}
+      </p>
+    </div>
+  )
+}
+
 export default function Jugar() {
   const closed = new Date() > DEADLINE
 
   const [teams, setTeams] = useState([])
+  const [step, setStep] = useState(1)
+  // Dirección de la última navegación, para animar la entrada del paso.
+  const [dir, setDir] = useState('fwd')
   const [lead, setLead] = useState(emptyLead)
   const [prediction, setPrediction] = useState(emptyPrediction)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [consentError, setConsentError] = useState('')
+
+  // Auto-avance diferido: lo dispara solo una selección nueva (no el montaje),
+  // así volver "Atrás" no reenvía hacia adelante.
+  const advanceTimer = useRef(null)
 
   useEffect(() => {
     supabase
       .from('teams')
-      .select('id, name, code, flag_emoji, group_name')
-      .order('group_name')
+      .select('id, name, flag_emoji')
       .order('name')
       .then(({ data, error: err }) => {
         if (err) setError('No pudimos cargar las selecciones. Recarga la página.')
@@ -56,18 +110,55 @@ export default function Jugar() {
       })
   }, [])
 
+  useEffect(() => () => clearTimeout(advanceTimer.current), [])
+
+  function clearAdvance() {
+    clearTimeout(advanceTimer.current)
+    advanceTimer.current = null
+  }
+
+  function goNext() {
+    clearAdvance()
+    setError('')
+    setDir('fwd')
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS))
+  }
+
+  function goBack() {
+    clearAdvance()
+    setError('')
+    setDir('back')
+    setStep((s) => Math.max(s - 1, 1))
+  }
+
+  // Selección de país: guarda el valor y avanza solo, tras un breve instante
+  // para que se vea la selección. Sin botón intermedio.
+  function pickTeam(field, v) {
+    setPrediction((p) => ({ ...p, [field]: v }))
+    clearAdvance()
+    const from = step
+    advanceTimer.current = setTimeout(() => {
+      setDir('fwd')
+      setStep((s) => (s === from ? Math.min(s + 1, TOTAL_STEPS) : s))
+    }, 320)
+  }
+
+  // Países disponibles para un campo: alfabéticos y sin los ya elegidos en
+  // otros campos (el propio valor sigue visible para poder corregirlo).
+  function availableTeams(field) {
+    const taken = PICK_FIELDS.filter((f) => f !== field)
+      .map((f) => prediction[f])
+      .filter(Boolean)
+    return teams.filter((t) => !taken.includes(String(t.id)))
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
 
-    const picks = [
-      prediction.champion_id,
-      prediction.runner_up_id,
-      prediction.semifinal_3_id,
-      prediction.semifinal_4_id,
-    ]
+    const picks = PICK_FIELDS.map((f) => prediction[f])
     if (picks.some((p) => !p)) {
-      setError('Completa las cuatro selecciones.')
+      setError('Faltan selecciones. Vuelve atrás y complétalas.')
       return
     }
     if (new Set(picks).size < 4) {
@@ -75,13 +166,26 @@ export default function Jugar() {
       return
     }
 
+    const email = lead.email.trim().toLowerCase()
+    if (!EMAIL_RE.test(email)) {
+      setEmailError('Debes ingresar un email válido.')
+      return
+    }
+    setEmailError('')
+
+    if (!lead.consent) {
+      setConsentError('Debes aceptar el tratamiento de datos para participar.')
+      return
+    }
+    setConsentError('')
+
     setSaving(true)
 
     // Un solo insert transaccional: si falla cualquiera de los dos, no queda nada
     const { error: submitError } = await supabase.rpc('submit_entry', {
       p_name: lead.name.trim(),
       p_instagram: lead.instagram.trim() || null,
-      p_email: lead.email.trim().toLowerCase(),
+      p_email: email,
       p_has_business: lead.has_business,
       p_business_name: lead.has_business ? lead.business_name.trim() : null,
       p_consent: lead.consent,
@@ -105,6 +209,9 @@ export default function Jugar() {
     setSaving(false)
     setSuccess(true)
   }
+
+  const goalsOver =
+    prediction.final_goals !== '' && Number(prediction.final_goals) > MAX_GOALS
 
   if (success) {
     const teamById = (id) => teams.find((t) => t.id === Number(id))
@@ -135,153 +242,221 @@ export default function Jugar() {
     )
   }
 
+  // Modo solo-lectura: ya pasó la fecha límite.
+  if (closed) {
+    return (
+      <main className="flex min-h-screen items-center bg-ink px-4 py-10 text-white">
+        <div className="mx-auto max-w-md text-center">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-cream/70">
+            MazzMKT · Mundial 2026
+          </p>
+          <p className="mt-6 text-5xl">🔒</p>
+          <h1 className="mt-4 text-2xl font-bold text-cream">
+            Pronósticos cerrados
+          </h1>
+          <p className="mt-2 text-white/70">
+            El plazo para participar terminó. Cuando se juegue la final,
+            publicaremos el ranking con los ganadores.
+          </p>
+          <a
+            href="/ranking"
+            className={`mt-8 inline-block w-full ${primaryBtn} text-center`}
+          >
+            Ver el ranking
+          </a>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-ink px-4 py-8 text-white">
-      <div className="mx-auto max-w-md">
-        <p className="text-center text-[11px] uppercase tracking-[0.3em] text-cream/70">
-          MazzMKT · Mundial 2026
-        </p>
-        <h1 className="mt-2 text-center text-3xl font-bold text-cream">
-          Prode Mundial 2026
-        </h1>
-        <p className="mt-1 text-center text-sm text-white/70">
-          Elige tus semifinalistas, el campeón y los goles de la final.
-        </p>
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col">
+        <div className="relative flex items-center justify-center">
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={goBack}
+              aria-label="Atrás"
+              className="absolute left-0 -ml-1.5 flex h-9 w-9 items-center justify-center rounded-full text-cream/80 transition hover:bg-white/10 hover:text-cream"
+            >
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+          )}
+          <p className="text-center text-[11px] uppercase tracking-[0.3em] text-cream/70">
+            MazzMKT · Mundial 2026
+          </p>
+        </div>
 
-        {closed && (
-          <div className="mt-5 rounded-xl border border-cream/30 bg-cream/10 p-4 text-center font-semibold text-cream">
-            🔒 Pronósticos cerrados
+        <div className="mt-6">
+          <Progress step={step} />
+        </div>
+
+        {/* Errores ajenos al envío (p. ej. fallo al cargar selecciones) */}
+        {error && step !== 6 && (
+          <p className="mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm font-medium text-red-300">
+            {error}
+          </p>
+        )}
+
+        <div
+          key={step}
+          className={`flex flex-1 flex-col ${dir === 'back' ? 'step-in-back' : 'step-in-fwd'}`}
+        >
+        {/* Pasos 1-4: una selección de país por pantalla */}
+        {step <= 4 &&
+          (() => {
+            const q = QUESTIONS[step - 1]
+            const value = prediction[q.field]
+            const options = availableTeams(q.field).map((t) => ({
+              value: t.id,
+              emoji: t.flag_emoji,
+              label: t.name,
+            }))
+
+            return (
+              <div className="flex flex-1 flex-col">
+                <div className="mb-6 text-center">
+                  <span className="text-4xl">{q.emoji}</span>
+                  <h1 className="mt-3 text-2xl font-bold text-cream">{q.title}</h1>
+                  {q.sub && (
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-cream/50">
+                      {q.sub}
+                    </p>
+                  )}
+                  {q.hint && <p className="mt-2 text-sm text-white/60">{q.hint}</p>}
+                </div>
+
+                {teams.length === 0 ? (
+                  <p className="text-center text-sm text-white/50">
+                    Cargando selecciones…
+                  </p>
+                ) : (
+                  <Dropdown
+                    id={`pick-${q.field}`}
+                    value={value}
+                    onChange={(v) => pickTeam(q.field, v)}
+                    placeholder="Elige una selección…"
+                    groups={[{ label: null, options }]}
+                  />
+                )}
+              </div>
+            )
+          })()}
+
+        {/* Paso 5: goles de la final (sin auto-avance) */}
+        {step === 5 && (
+          <div className="flex flex-1 flex-col">
+            <div className="mb-6 text-center">
+              <span className="text-4xl">⚽</span>
+              <h1 className="mt-3 text-2xl font-bold text-cream">
+                ¿Goles en la final?
+              </h1>
+              <p className="mt-1 text-sm text-white/60">
+                Total entre los dos equipos. Solo se usa para desempatar si
+                acabas con los mismos puntos que otra persona que juega.
+              </p>
+            </div>
+
+            <input
+              id="pred-final-goals"
+              type="number"
+              min="0"
+              max={MAX_GOALS}
+              inputMode="numeric"
+              placeholder="Ej: 3"
+              className={inputClass}
+              value={prediction.final_goals}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, '')
+                setPrediction((p) => ({ ...p, final_goals: digits }))
+              }}
+            />
+
+            {goalsOver && (
+              <p className="mt-2 text-xs font-medium text-red-300">
+                El máximo permitido es {MAX_GOALS} goles.
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={prediction.final_goals === '' || goalsOver}
+              className={`mt-8 w-full ${primaryBtn}`}
+            >
+              Siguiente
+            </button>
           </div>
         )}
 
-        <details
-          open
-          className="group mt-5 rounded-2xl border border-cream/15 bg-white/5 p-5"
-        >
-          <summary className="flex cursor-pointer list-none items-center justify-between text-lg font-bold text-cream [&::-webkit-details-marker]:hidden">
-            ¿Cómo participo?
-            <span className="text-base text-cream/60 transition-transform group-open:rotate-180">
-              ▾
-            </span>
-          </summary>
-
-          <div className="mt-6 space-y-6 text-sm leading-relaxed text-white/80">
-            {/* Pasos para participar */}
-            <ol className="space-y-4">
-              {[
-                <>
-                  Comenta <strong>MUNDIAL</strong> en el post, dale like y sigue
-                  la cuenta <strong>@mazzmkt</strong> en Instagram.
-                </>,
-                'Elige tus 4 selecciones: quién saldrá campeón, quién subcampeón, y las otras 2 que llegarán a las semifinales.',
-                'Añade cuántos goles crees que habrá en la final (esto servirá en caso de empate para los posibles ganadores del prode).',
-                <>
-                  Envía tu pronóstico antes del <strong>{DEADLINE_LABEL}</strong>.
-                  ¡Listo, ya estás participando!
-                </>,
-              ].map((step, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-bold text-ink">
-                    {i + 1}
-                  </span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
-
-            {/* Puntos */}
-            <div className="pt-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cream/70">
-                Así sumarás puntos
-              </p>
-              <ul className="space-y-1.5">
-                <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">
-                  <span>Si aciertas el campeón</span>
-                  <span className="shrink-0 font-bold text-cream">+50</span>
-                </li>
-                <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">
-                  <span>Si aciertas el subcampeón</span>
-                  <span className="shrink-0 font-bold text-cream">+25</span>
-                </li>
-                <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">
-                  <span>Cada semifinalista acertado <span className="text-white/50">(los 4 cuentan)</span></span>
-                  <span className="shrink-0 font-bold text-cream">+10</span>
-                </li>
-                <li className="flex items-baseline justify-between gap-3 border-b border-cream/10 pb-1.5">
-                  <span>Goles en la final</span>
-                  <span className="shrink-0 text-white/50">solo desempatan</span>
-                </li>
-                <li className="flex items-baseline justify-between gap-3 pt-0.5">
-                  <span className="font-semibold text-cream">Máximo</span>
-                  <span className="shrink-0 font-bold text-cream">115 puntos</span>
-                </li>
-              </ul>
+        {/* Paso 6: datos y envío (sin auto-avance) */}
+        {step === 6 && (
+          <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+            <div className="mb-6 text-center">
+              <span className="text-4xl">📝</span>
+              <h1 className="mt-3 text-2xl font-bold text-cream">Tus datos</h1>
             </div>
 
-            {/* Premios */}
-            <div className="pt-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cream/70">
-                Premios
-              </p>
-              <ul className="space-y-1.5">
-                {PRIZES.map((p) => (
-                  <li key={p.place} className="flex items-center gap-3">
-                    <span className="shrink-0 text-lg">{p.medal}</span>
-                    <span>
-                      <span className="font-semibold text-cream">{p.place}:</span>{' '}
-                      {p.prize}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </details>
-
-        <form
-          onSubmit={handleSubmit}
-          className="mt-5 space-y-8 rounded-2xl border border-cream/15 bg-white/5 p-5"
-        >
-          <LeadForm value={lead} onChange={setLead} disabled={closed} />
-          <PredictionForm
-            value={prediction}
-            onChange={setPrediction}
-            teams={teams}
-            disabled={closed}
-          />
-
-          <fieldset disabled={closed} className="flex items-start gap-3 rounded-xl bg-white/5 p-3">
-            <input
-              id="lead-consent"
-              type="checkbox"
-              required
-              className="mt-0.5 h-5 w-5 shrink-0 rounded accent-cream"
-              checked={lead.consent}
-              onChange={(e) => setLead({ ...lead, consent: e.target.checked })}
+            <LeadForm
+              value={lead}
+              onChange={(v) => {
+                setLead(v)
+                if (emailError) setEmailError('')
+              }}
+              emailError={emailError}
             />
-            <label htmlFor="lead-consent" className="text-xs leading-relaxed text-white/60">
-              Acepto que mis datos se usen para gestionar este juego y recibir
-              comunicaciones relacionadas, conforme al RGPD. Puedo pedir su
-              eliminación en cualquier momento. *
-            </label>
-          </fieldset>
 
-          {error && (
-            <p className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm font-medium text-red-300">
-              {error}
-            </p>
-          )}
+            <div className="mt-6">
+              <fieldset className="flex items-start gap-3 rounded-xl bg-white/5 p-3">
+                <input
+                  id="lead-consent"
+                  type="checkbox"
+                  className="mt-0.5 h-5 w-5 shrink-0 rounded accent-cream"
+                  checked={lead.consent}
+                  onChange={(e) => {
+                    setLead({ ...lead, consent: e.target.checked })
+                    if (consentError) setConsentError('')
+                  }}
+                />
+                <label htmlFor="lead-consent" className="text-xs leading-relaxed text-white/60">
+                  Acepto que mis datos se usen para gestionar este juego y recibir
+                  comunicaciones relacionadas, conforme al RGPD. Puedo pedir su
+                  eliminación en cualquier momento. *
+                </label>
+              </fieldset>
+              {consentError && (
+                <p className="mt-2 text-xs font-medium text-red-300">{consentError}</p>
+              )}
+            </div>
 
-          {!closed && (
+            {error && (
+              <p className="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm font-medium text-red-300">
+                {error}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={saving || teams.length === 0}
-              className="w-full rounded-xl bg-cream py-3.5 text-base font-bold text-ink transition hover:bg-white active:scale-[0.99] disabled:opacity-60"
+              className={`mt-8 w-full ${primaryBtn}`}
             >
-              {saving ? 'Guardando…' : 'Enviar pronóstico'}
+              {saving ? 'Enviando…' : 'Enviar pronóstico'}
             </button>
-          )}
-        </form>
+          </form>
+        )}
+        </div>
       </div>
     </main>
   )

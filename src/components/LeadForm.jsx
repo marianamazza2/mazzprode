@@ -1,15 +1,11 @@
 const inputClass =
   'w-full rounded-xl border border-cream/30 bg-transparent px-3 py-2.5 text-base text-white placeholder:text-xs placeholder:text-white/40 focus:border-cream focus:outline-none disabled:opacity-50'
 
-export default function LeadForm({ value, onChange, disabled }) {
+export default function LeadForm({ value, onChange, disabled, emailError }) {
   const set = (field, v) => onChange({ ...value, [field]: v })
 
   return (
     <fieldset disabled={disabled} className="space-y-4">
-      <legend className="mb-4 text-lg font-bold text-cream">
-        Añade tus datos para participar
-      </legend>
-
       <div>
         <label htmlFor="lead-name" className="mb-2 block text-sm font-medium text-white/70">
           Nombre *
@@ -46,46 +42,18 @@ export default function LeadForm({ value, onChange, disabled }) {
         </label>
         <input
           id="lead-email"
-          type="email"
-          required
+          type="text"
+          inputMode="email"
           autoComplete="email"
           placeholder="tu@email.com"
           className={inputClass}
           value={value.email}
           onChange={(e) => set('email', e.target.value)}
         />
+        {emailError && (
+          <p className="mt-2 text-xs font-medium text-red-300">{emailError}</p>
+        )}
       </div>
-
-      <div className="flex items-center gap-3">
-        <input
-          id="lead-has-business"
-          type="checkbox"
-          className="h-5 w-5 shrink-0 rounded accent-cream"
-          checked={value.has_business}
-          onChange={(e) => set('has_business', e.target.checked)}
-        />
-        <label htmlFor="lead-has-business" className="text-sm font-medium text-white/70">
-          ¿Tienes un negocio?
-        </label>
-      </div>
-
-      {value.has_business && (
-        <div>
-          <label htmlFor="lead-business-name" className="mb-2 block text-sm font-medium text-white/70">
-            ¿Cuál? *
-          </label>
-          <input
-            id="lead-business-name"
-            type="text"
-            required
-            placeholder="Nombre de tu negocio"
-            className={inputClass}
-            value={value.business_name}
-            onChange={(e) => set('business_name', e.target.value)}
-          />
-        </div>
-      )}
-
     </fieldset>
   )
 }
