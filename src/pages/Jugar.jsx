@@ -84,6 +84,7 @@ export default function Jugar() {
   const closed = new Date() > DEADLINE
 
   const [teams, setTeams] = useState([])
+  const [loading, setLoading] = useState(true)
   const [step, setStep] = useState(1)
   // Dirección de la última navegación, para animar la entrada del paso.
   const [dir, setDir] = useState('fwd')
@@ -107,6 +108,7 @@ export default function Jugar() {
       .then(({ data, error: err }) => {
         if (err) setError('No pudimos cargar las selecciones. Recarga la página.')
         else setTeams(data)
+        setLoading(false)
       })
   }, [])
 
@@ -243,6 +245,13 @@ export default function Jugar() {
             instagram={lead.instagram}
             name={lead.name}
           />
+
+          <a
+            href="/"
+            className="block text-center text-sm font-medium text-cream/70 underline-offset-4 transition hover:text-cream hover:underline"
+          >
+            Volver al inicio
+          </a>
         </div>
       </main>
     )
@@ -271,6 +280,20 @@ export default function Jugar() {
             Ver el ranking
           </a>
         </div>
+      </main>
+    )
+  }
+
+  // Cortina de carga mientras llegan las selecciones desde Supabase, para no
+  // mostrar el primer paso con el dropdown todavía vacío.
+  if (loading) {
+    return (
+      <main className="flex min-h-[100dvh] flex-col items-center justify-center bg-ink px-4 text-white">
+        <p className="text-[11px] uppercase tracking-[0.3em] text-cream/70">
+          MazzMKT · Mundial 2026
+        </p>
+        <div className="mt-6 h-8 w-8 animate-spin rounded-full border-2 border-cream/25 border-t-cream" />
+        <p className="mt-4 text-sm text-white/50">Preparando el prode…</p>
       </main>
     )
   }
@@ -344,11 +367,7 @@ export default function Jugar() {
                   {q.hint && <p className="mt-2 text-sm text-white/60">{q.hint}</p>}
                 </div>
 
-                {teams.length === 0 ? (
-                  <p className="text-center text-sm text-white/50">
-                    Cargando selecciones…
-                  </p>
-                ) : (
+                {teams.length > 0 && (
                   <Dropdown
                     id={`pick-${q.field}`}
                     value={value}

@@ -40,7 +40,7 @@ export default function PredictionCard({
       // visualViewport refleja el alto realmente visible en móvil (descontando
       // las barras del navegador). Reservamos sitio para el título y el botón.
       const vh = window.visualViewport?.height ?? window.innerHeight
-      const RESERVED = 290
+      const RESERVED = 330
       const s = Math.min(availW / CARD_W, (vh - RESERVED) / CARD_H, 1)
       setScale(Math.max(0.45, s))
     }
@@ -146,11 +146,6 @@ export default function PredictionCard({
             mazzmkt
           </span>
         </div>
-
-        {/* Mini-CTA al pie */}
-        <p className="mt-4 rounded-lg bg-cream py-2.5 text-center text-sm font-bold text-ink">
-          👉 Visita @mazzmkt y juega
-        </p>
           </div>
         </div>
       </div>
