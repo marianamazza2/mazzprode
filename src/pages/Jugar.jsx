@@ -222,8 +222,8 @@ export default function Jugar() {
   if (success) {
     const teamById = (id) => teams.find((t) => t.id === Number(id))
     return (
-      <main className="min-h-screen bg-ink px-4 py-6 text-white">
-        <div className="mx-auto max-w-md space-y-4">
+      <main className="flex min-h-[100dvh] items-center justify-center bg-ink px-4 py-6 text-white">
+        <div className="w-full max-w-md space-y-4">
           <div className="text-center">
             <p className="text-4xl">🎉</p>
             <h1 className="mt-2 text-xl font-bold text-cream">

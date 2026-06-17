@@ -40,7 +40,7 @@ export default function PredictionCard({
       // visualViewport refleja el alto realmente visible en móvil (descontando
       // las barras del navegador). Reservamos sitio para el título y el botón.
       const vh = window.visualViewport?.height ?? window.innerHeight
-      const RESERVED = 270
+      const RESERVED = 290
       const s = Math.min(availW / CARD_W, (vh - RESERVED) / CARD_H, 1)
       setScale(Math.max(0.45, s))
     }
