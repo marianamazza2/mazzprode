@@ -8,6 +8,7 @@ export default function Ranking() {
   const [rows, setRows] = useState(null) // null = cargando
   const [error, setError] = useState('')
   const [page, setPage] = useState(0)
+  const [ready, setReady] = useState(null) // null = aún no sabemos
 
   useEffect(() => {
     async function load() {
@@ -17,13 +18,21 @@ export default function Ranking() {
         supabase
           .from('leaderboard')
           .select('instagram, name, points, final_goals, created_at'),
-        supabase.from('results').select('final_goals').eq('id', 1).single(),
+        supabase
+          .from('results')
+          .select('final_goals, semifinalists, champion_id')
+          .eq('id', 1)
+          .single(),
       ])
 
       if (boardRes.error || resultsRes.error) {
         setError('No pudimos cargar el ranking. Recarga la página.')
         return
       }
+
+      // El ranking solo es significativo una vez que hay resultados cargados.
+      const res = resultsRes.data
+      setReady(res?.semifinalists?.length > 0 || res?.champion_id != null)
 
       const realGoals = resultsRes.data?.final_goals
 
@@ -91,13 +100,20 @@ export default function Ranking() {
             </div>
           )}
 
-          {!error && rows?.length === 0 && (
+          {!error && ready === false && (
+            <p className="py-12 text-center text-sm text-white/70">
+              El ranking estará disponible cuando arranque la fase final.
+            </p>
+          )}
+
+          {!error && ready && rows?.length === 0 && (
             <p className="py-8 text-center text-sm text-white/70">
               Todavía no hay pronósticos cargados.
             </p>
           )}
 
           {!error &&
+            ready &&
             pageRows.map((row, index) => {
               const position = page * PAGE_SIZE + index + 1
               const ig = row.instagram?.trim()
@@ -128,7 +144,7 @@ export default function Ranking() {
             })}
         </div>
 
-        {!error && totalPages > 1 && (
+        {!error && ready && totalPages > 1 && (
           <div className="mt-6 flex items-center justify-center gap-6">
             <button
               type="button"

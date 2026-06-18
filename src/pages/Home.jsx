@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
 /* Balón = emoji real, integrado a la paleta */
 function Ball({ className }) {
@@ -33,6 +35,23 @@ function Trophy({ className }) {
 }
 
 export default function Home() {
+  // El ranking se habilita cuando ya hay resultados cargados (semifinalistas
+  // o campeón). Antes de eso todos tienen 0 puntos y no tiene sentido mostrarlo.
+  const [rankingReady, setRankingReady] = useState(false)
+
+  useEffect(() => {
+    supabase
+      .from('results')
+      .select('semifinalists, champion_id')
+      .eq('id', 1)
+      .single()
+      .then(({ data }) => {
+        if (data?.semifinalists?.length > 0 || data?.champion_id != null) {
+          setRankingReady(true)
+        }
+      })
+  }, [])
+
   return (
     <main className="relative flex h-[100svh] flex-col items-center justify-center overflow-hidden bg-ink px-4 py-8 text-center text-white">
       {/* Fondo */}
@@ -92,12 +111,24 @@ export default function Home() {
               →
             </span>
           </Link>
-          <Link
-            to="/ranking"
-            className="block w-full rounded-xl border border-cream/30 py-3.5 text-sm font-semibold uppercase tracking-wide text-white transition hover:border-cream hover:bg-white/5 active:scale-[0.99]"
-          >
-            Ver ranking
-          </Link>
+          {rankingReady ? (
+            <Link
+              to="/ranking"
+              className="block w-full rounded-xl border border-cream/30 py-3.5 text-sm font-semibold uppercase tracking-wide text-white transition hover:border-cream hover:bg-white/5 active:scale-[0.99]"
+            >
+              Ver ranking
+            </Link>
+          ) : (
+            <div
+              aria-disabled="true"
+              className="block w-full cursor-not-allowed rounded-xl border border-cream/10 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/30"
+            >
+              Ver ranking
+              <span className="mt-1 block text-[10px] font-normal normal-case tracking-normal text-white/25">
+                Disponible cuando arranque la fase final
+              </span>
+            </div>
+          )}
         </div>
 
         {/* meta */}
