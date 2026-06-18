@@ -125,7 +125,7 @@ export default function Home() {
             >
               Ver ranking
               <span className="mt-1 block text-[10px] font-normal normal-case tracking-normal text-white/25">
-                Disponible cuando arranque la fase final
+                Disponible cuando comience la fase final
               </span>
             </div>
           )}

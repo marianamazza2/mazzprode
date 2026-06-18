@@ -102,7 +102,7 @@ export default function Ranking() {
 
           {!error && ready === false && (
             <p className="py-12 text-center text-sm text-white/70">
-              El ranking estará disponible cuando arranque la fase final.
+              El ranking estará disponible cuando comience la fase final.
             </p>
           )}
 
