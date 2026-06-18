@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const medals = { 1: '🥇', 2: '🥈', 3: '🥉' }
-const PAGE_SIZE = 8
+const PAGE_SIZE = 7
 
 export default function Ranking() {
   const [rows, setRows] = useState(null) // null = cargando
@@ -51,18 +51,32 @@ export default function Ranking() {
   return (
     <main className="min-h-screen bg-ink px-4 py-10 text-white">
       <div className="mx-auto max-w-md">
-        <a
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-cream/70 underline-offset-4 transition hover:text-cream hover:underline"
-        >
-          <span aria-hidden="true">←</span> Volver al inicio
-        </a>
-
-        <header className="mt-6 text-center">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-cream/70">
+        <div className="relative flex items-center justify-center">
+          <a
+            href="/"
+            aria-label="Atrás"
+            className="absolute left-0 -ml-1.5 flex h-9 w-9 items-center justify-center rounded-full text-cream/80 transition hover:bg-white/10 hover:text-cream"
+          >
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </a>
+          <p className="text-center text-[11px] uppercase tracking-[0.3em] text-cream/70">
             MazzMKT · Mundial 2026
           </p>
-          <h1 className="mt-2 text-4xl font-bold text-cream">Ranking</h1>
+        </div>
+
+        <header className="mt-6 text-center">
+          <h1 className="text-4xl font-bold text-cream">Ranking</h1>
         </header>
 
         <div className="mt-8 border-t border-cream/20">
@@ -71,7 +85,10 @@ export default function Ranking() {
           )}
 
           {!error && rows === null && (
-            <p className="py-8 text-center text-sm text-white/50">Cargando…</p>
+            <div className="flex flex-col items-center py-12">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-cream/25 border-t-cream" />
+              <p className="mt-4 text-sm text-white/50">Cargando ranking…</p>
+            </div>
           )}
 
           {!error && rows?.length === 0 && (
