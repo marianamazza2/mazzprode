@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const medals = { 1: '🥇', 2: '🥈', 3: '🥉' }
+const PAGE_SIZE = 8
 
 export default function Ranking() {
   const [rows, setRows] = useState(null) // null = cargando
   const [error, setError] = useState('')
+  const [page, setPage] = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -43,10 +45,20 @@ export default function Ranking() {
     load()
   }, [])
 
+  const totalPages = rows ? Math.ceil(rows.length / PAGE_SIZE) : 0
+  const pageRows = rows ? rows.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE) : []
+
   return (
     <main className="min-h-screen bg-ink px-4 py-10 text-white">
       <div className="mx-auto max-w-md">
-        <header className="text-center">
+        <a
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-cream/70 underline-offset-4 transition hover:text-cream hover:underline"
+        >
+          <span aria-hidden="true">←</span> Volver al inicio
+        </a>
+
+        <header className="mt-6 text-center">
           <p className="text-[11px] uppercase tracking-[0.3em] text-cream/70">
             MazzMKT · Mundial 2026
           </p>
@@ -69,8 +81,8 @@ export default function Ranking() {
           )}
 
           {!error &&
-            rows?.map((row, index) => {
-              const position = index + 1
+            pageRows.map((row, index) => {
+              const position = page * PAGE_SIZE + index + 1
               const ig = row.instagram?.trim()
               const handle = ig
                 ? ig.startsWith('@')
@@ -98,6 +110,32 @@ export default function Ranking() {
               )
             })}
         </div>
+
+        {!error && totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-center gap-6">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              aria-label="Página anterior"
+              className="text-2xl leading-none text-cream/70 transition hover:text-cream disabled:cursor-default disabled:opacity-20"
+            >
+              ←
+            </button>
+            <span className="text-xs uppercase tracking-[0.2em] text-cream/50 tabular-nums">
+              {page + 1} / {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              aria-label="Página siguiente"
+              className="text-2xl leading-none text-cream/70 transition hover:text-cream disabled:cursor-default disabled:opacity-20"
+            >
+              →
+            </button>
+          </div>
+        )}
       </div>
     </main>
   )
