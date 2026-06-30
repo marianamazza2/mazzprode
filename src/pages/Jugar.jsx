@@ -5,7 +5,7 @@ import LeadForm from '../components/LeadForm.jsx'
 import PredictionCard from '../components/PredictionCard.jsx'
 
 // Los pronósticos cierran al final del 28/06/2026 (hora argentina)
-const DEADLINE = new Date('2026-06-28T23:59:59-03:00')
+export const DEADLINE = new Date('2026-06-28T23:59:59-03:00')
 
 const TOTAL_STEPS = 6
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { DEADLINE } from './Jugar.jsx'
 
 /* Balón = emoji real, integrado a la paleta */
 function Ball({ className }) {
@@ -38,6 +39,9 @@ export default function Home() {
   // El ranking se habilita cuando ya hay resultados cargados (semifinalistas
   // o campeón). Antes de eso todos tienen 0 puntos y no tiene sentido mostrarlo.
   const [rankingReady, setRankingReady] = useState(false)
+
+  // Los pronósticos ya cerraron: deshabilitamos el botón de jugar.
+  const closed = new Date() > DEADLINE
 
   useEffect(() => {
     supabase
@@ -102,15 +106,27 @@ export default function Home() {
         </p>
 
         <div className="mt-9 space-y-3">
-          <Link
-            to="/jugar"
-            className="group block w-full rounded-xl bg-cream py-3.5 text-sm font-semibold uppercase tracking-wide text-ink shadow-lg shadow-cream/10 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-cream/20 active:translate-y-0"
-          >
-            Jugar
-            <span className="ml-1 inline-block transition-transform group-hover:translate-x-1">
-              →
-            </span>
-          </Link>
+          {closed ? (
+            <div
+              aria-disabled="true"
+              className="block w-full cursor-not-allowed rounded-xl bg-cream/20 py-3.5 text-sm font-semibold uppercase tracking-wide text-ink/40"
+            >
+              Jugar
+              <span className="mt-1 block text-[10px] font-normal normal-case tracking-normal text-ink/40">
+                El plazo para participar terminó
+              </span>
+            </div>
+          ) : (
+            <Link
+              to="/jugar"
+              className="group block w-full rounded-xl bg-cream py-3.5 text-sm font-semibold uppercase tracking-wide text-ink shadow-lg shadow-cream/10 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-cream/20 active:translate-y-0"
+            >
+              Jugar
+              <span className="ml-1 inline-block transition-transform group-hover:translate-x-1">
+                →
+              </span>
+            </Link>
+          )}
           {rankingReady ? (
             <Link
               to="/ranking"
